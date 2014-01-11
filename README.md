@@ -27,7 +27,12 @@ The following tools are needed to build Gravity from source:
 * sbt (0.12.4)
 * [Inkscape](http://inkscape.org) and [ImageMagick](http://www.imagemagick.org)
   to generate icons.
-  
+
+The only library dependency is
+[scasci](http://github.com/whily/scasci). Currently, the only way to
+use this lib is to generate the jar file (with `sbt package` command)
+and put it into the `/lib` directory under the source tree of Gravity.
+
 To compile/run the code, follow the steps below:
 
 1. This step is a work around. It seems that the plugin sbt-android
