@@ -51,16 +51,63 @@ class ShowActivity extends Activity {
   }
 }
 
-class ShowView(context: Context) extends View(context) {
+class ShowView(context: Context) extends View(context) with Runnable {
   val paint = new Paint()
   paint.setAntiAlias(true)
-  paint.setStyle(Paint.Style.STROKE)
+  paint.setStyle(Paint.Style.FILL)
   val sim = NBody.figure8Sim
+  var time = System.currentTimeMillis()
+  var simTime = 0.0
+  var orbit: List[(Double, Double)] = List()
+  (new Thread(this)).start()
 
   override def onDraw(canvas: Canvas) {
+    val showOrbit = true
     super.onDraw(canvas)
     canvas.drawColor(Color.BLACK)
-    paint.setColor(Color.GREEN)
-    canvas.drawCircle(300, 200, 18, paint)
+
+    val width = canvas.getWidth()
+    val height = canvas.getHeight()
+
+    if (showOrbit) {
+      orbit = List((sim.bodies(0).pos.x, sim.bodies(0).pos.y)) ::: orbit
+
+      for (coord <- orbit) {
+        val (x, y) = coord
+        drawCartesianXY(x, y, width, height, canvas, Color.GRAY, 2)
+      }
+    }
+
+    drawBody(sim.bodies(0), width, height, canvas, Color.GREEN)
+    drawBody(sim.bodies(1), width, height, canvas, Color.YELLOW)
+    drawBody(sim.bodies(2), width, height, canvas, Color.BLUE)
+  }
+
+  override def run() {
+    while(!Thread.currentThread().isInterrupted()) {
+      try{
+        val now = System.currentTimeMillis()
+        val elapsed = (now - time) / 1000.0
+        time = now
+        simTime += elapsed / 5.0 // Slow down simulation
+        sim.evolve("rk4", simTime)
+        // TODO: Try FPS limitation here.
+      } catch {
+        case ex: InterruptedException => Thread.currentThread().interrupt()
+      }
+      postInvalidate()
+    }
+  }
+
+  private def drawBody(body: Body, width: Int, height: Int, canvas: Canvas, color: Int) {
+    drawCartesianXY(body.pos.x, body.pos.y, width, height, canvas, color, 18)
+  }
+
+  private def drawCartesianXY(x: Double, y: Double, width: Int, height: Int, canvas: Canvas, color: Int, radius: Int) {
+    val scaling = 400
+    val screenX = (x * scaling).toInt + width / 2
+    val screenY = (y * scaling).toInt + height / 2
+    paint.setColor(color)
+    canvas.drawCircle(screenX, screenY, radius, paint)
   }
 }
