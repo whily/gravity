@@ -14,10 +14,11 @@ package net.whily.android.gravity
 import scala.collection.mutable
 import android.app.{ActionBar, Activity}
 import android.content.{Intent, Context}
-import android.graphics.Canvas
+import android.graphics.{Canvas, Color, Paint}
 import android.os.Bundle
 import android.view.{Menu, MenuItem, MotionEvent, View}
 import android.widget.{LinearLayout}
+import net.whily.scasci.phys._
 
 class ShowActivity extends Activity {
   private var bar: ActionBar = null
@@ -51,6 +52,15 @@ class ShowActivity extends Activity {
 }
 
 class ShowView(context: Context) extends View(context) {
+  val paint = new Paint()
+  paint.setAntiAlias(true)
+  paint.setStyle(Paint.Style.STROKE)
+  val sim = NBody.figure8Sim
+
   override def onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    canvas.drawColor(Color.BLACK)
+    paint.setColor(Color.GREEN)
+    canvas.drawCircle(300, 200, 18, paint)
   }
 }
