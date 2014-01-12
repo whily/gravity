@@ -28,12 +28,19 @@ class ShowActivity extends Activity {
     super.onCreate(icicle)
 
     view = new ShowView(this)
-    setContentView(view)
-
-    setTitle("")
+    setContentView(view)  
     
     bar = getActionBar
     bar.setHomeButtonEnabled(true)
+
+    // Enter immersive mode.
+    getWindow().getDecorView().
+      setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | 
+                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_IMMERSIVE)
   }
    
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
@@ -89,7 +96,7 @@ class ShowView(context: Context) extends View(context) with Runnable {
         val now = System.currentTimeMillis()
         val elapsed = (now - time) / 1000.0
         time = now
-        simTime += elapsed / 5.0 // Slow down simulation
+        simTime += elapsed / 10.0 // Slow down simulation
         sim.evolve("rk4", simTime)
         // TODO: Try FPS limitation here.
       } catch {
