@@ -69,8 +69,20 @@ class ShowView(context: Context) extends View(context) with Runnable {
   var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
   (new Thread(this)).start()
 
+  private def scalingFactor(width: Int, height: Int): Double = {
+    var maxX = 0.0
+    var maxY = 0.0
+    for (body <- config.bodies) {
+      if (math.abs(body.pos.x) > maxX) maxX = math.abs(body.pos.x)
+      if (math.abs(body.pos.y) > maxY) maxY = math.abs(body.pos.y)
+    }
+    // 0.8 i used so that the figure is not occupying the whole canvas.
+    0.8 * math.min(width / 2 / maxX, width / 2 / maxY)
+  }
+
   override def onDraw(canvas: Canvas) {
     val showOrbit = true
+    val showInfo = false
     super.onDraw(canvas)
     canvas.drawColor(Color.BLACK)
     val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
@@ -115,9 +127,9 @@ class ShowView(context: Context) extends View(context) with Runnable {
   }
 
   private def drawCartesianXY(x: Double, y: Double, width: Int, height: Int, canvas: Canvas, color: Int, radius: Int) {
-    val scaling = 400
-    val screenX = (x * scaling).toInt + width / 2
-    val screenY = (y * scaling).toInt + height / 2
+    val sf = scalingFactor(width, height)
+    val screenX = (x * sf).toInt + width / 2
+    val screenY = (y * sf).toInt + height / 2
     paint.setColor(color)
     canvas.drawCircle(screenX, screenY, radius, paint)
   }
