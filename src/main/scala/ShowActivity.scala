@@ -62,7 +62,8 @@ class ShowView(context: Context) extends View(context) with Runnable {
   val paint = new Paint()
   paint.setAntiAlias(true)
   paint.setStyle(Paint.Style.FILL)
-  val sim = NBody.brouckeA2Sim //figure8Sim
+  val config = NBody.brouckeA10Config
+  val sim = new NBody(config, 0.0001)
   var time = System.currentTimeMillis()
   var simTime = 0.0
   var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
@@ -79,8 +80,9 @@ class ShowView(context: Context) extends View(context) with Runnable {
     val height = canvas.getHeight()
 
     if (showOrbit) {
-      for (i <- 0 until sim.bodies.length)
-        orbit = (sim.bodies(i).pos.x, sim.bodies(i).pos.y, colors(i)) :: orbit
+      if (simTime < config.period)
+        for (i <- 0 until sim.bodies.length)
+          orbit = (sim.bodies(i).pos.x, sim.bodies(i).pos.y, colors(i)) :: orbit
 
       for (coord <- orbit) {
         val (x, y, color) = coord
