@@ -72,12 +72,14 @@ class ShowView(context: Context) extends View(context) with Runnable {
     val showOrbit = true
     super.onDraw(canvas)
     canvas.drawColor(Color.BLACK)
+    val colors = Array(Color.GREEN, Color.MAGENTA, Color.BLUE, Color.RED, Color.CYAN)
 
     val width = canvas.getWidth()
     val height = canvas.getHeight()
 
     if (showOrbit) {
-      orbit = List((sim.bodies(0).pos.x, sim.bodies(0).pos.y)) ::: orbit
+      for (body <- sim.bodies)
+        orbit = (body.pos.x, body.pos.y) :: orbit
 
       for (coord <- orbit) {
         val (x, y) = coord
@@ -85,9 +87,8 @@ class ShowView(context: Context) extends View(context) with Runnable {
       }
     }
 
-    drawBody(sim.bodies(0), width, height, canvas, Color.GREEN)
-    drawBody(sim.bodies(1), width, height, canvas, Color.YELLOW)
-    drawBody(sim.bodies(2), width, height, canvas, Color.BLUE)
+    for (i <- 0 until sim.bodies.length) 
+      drawBody(sim.bodies(i), width, height, canvas, colors(i))
   }
 
   override def run() {
