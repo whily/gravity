@@ -29,9 +29,8 @@ The following tools are needed to build Gravity from source:
   to generate icons.
 
 The only library dependency is
-[scasci](http://github.com/whily/scasci). Currently, the only way to
-use this lib is to generate the jar file (with `sbt package` command)
-and put it into the `/lib` directory under the source tree of Gravity.
+[scasci](http://github.com/whily/scasci). Please follow the steps
+discussed there on how to use the library.
 
 To compile/run the code, follow the steps below:
 
