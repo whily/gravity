@@ -17,18 +17,20 @@ import android.content.{Intent, Context}
 import android.graphics.{Canvas, Color, Paint}
 import android.os.Bundle
 import android.view.{Menu, MenuItem, MotionEvent, View}
-import android.widget.{LinearLayout}
+import android.widget.{ArrayAdapter, LinearLayout}
 import net.whily.scasci.phys._
 
-class ShowActivity extends Activity {
+class ShowActivity extends Activity with ActionBar.OnNavigationListener {
   private var bar: ActionBar = null
   private var view: ShowView = null
+  private var configId: Int   = 0
   
   override def onCreate(icicle: Bundle) { 
     super.onCreate(icicle)
 
-    view = new ShowView(this)
+    view = new ShowView(this, configId)
     setContentView(view)  
+    setTitle("")
     
     bar = getActionBar
     bar.setHomeButtonEnabled(true)
@@ -41,6 +43,13 @@ class ShowActivity extends Activity {
                             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                             View.SYSTEM_UI_FLAG_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_IMMERSIVE)
+
+    // Show navigation list, which is at the left side of action bar.
+    val configNames = NBody.threeBodyConfigs map (_.name)
+    val configAdapter = new ArrayAdapter[String](this, android.R.layout.simple_spinner_item, configNames) 
+    configAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST)
+    bar.setListNavigationCallbacks(configAdapter, this)
   }
    
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
@@ -56,18 +65,30 @@ class ShowActivity extends Activity {
         true
     }
   }
+
+  override def onNavigationItemSelected(itemPosition: Int, itemId: Long): Boolean = {
+    if (itemPosition != configId) {
+      configId = itemPosition
+      view = new ShowView(this, configId)
+      setContentView(view)
+    }    
+    
+    true
+  }
 }
 
-class ShowView(context: Context) extends View(context) with Runnable {
-  val paint = new Paint()
-  paint.setAntiAlias(true)
-  paint.setStyle(Paint.Style.FILL)
-  val config = NBody.brouckeA10Config
+class ShowView(context: Context, configId: Int) extends View(context) with Runnable {
+  val config = NBody.threeBodyConfigs(configId)
   val sim = new NBody(config, 0.0001)
   var time = System.currentTimeMillis()
   var simTime = 0.0
   var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
   (new Thread(this)).start()
+  var sf = 0.0
+
+  val paint = new Paint()
+  paint.setAntiAlias(true)
+  paint.setStyle(Paint.Style.FILL)
 
   private def scalingFactor(width: Int, height: Int): Double = {
     var maxX = 0.0
@@ -81,15 +102,21 @@ class ShowView(context: Context) extends View(context) with Runnable {
   }
 
   override def onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+
     val showOrbit = true
     val showInfo = false
-    super.onDraw(canvas)
+
     canvas.drawColor(Color.BLACK)
     val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
     assert(sim.bodies.length <= colors.length)
 
     val width = canvas.getWidth()
     val height = canvas.getHeight()
+
+    if (sf == 0.0) 
+      sf = scalingFactor(width, height)
+
 
     if (showOrbit) {
       if (simTime < config.period)
@@ -127,7 +154,6 @@ class ShowView(context: Context) extends View(context) with Runnable {
   }
 
   private def drawCartesianXY(x: Double, y: Double, width: Int, height: Int, canvas: Canvas, color: Int, radius: Int) {
-    val sf = scalingFactor(width, height)
     val screenX = (x * sf).toInt + width / 2
     val screenY = (y * sf).toInt + height / 2
     paint.setColor(color)
