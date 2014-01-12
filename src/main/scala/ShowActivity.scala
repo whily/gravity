@@ -62,28 +62,29 @@ class ShowView(context: Context) extends View(context) with Runnable {
   val paint = new Paint()
   paint.setAntiAlias(true)
   paint.setStyle(Paint.Style.FILL)
-  val sim = NBody.figure8Sim
+  val sim = NBody.brouckeA2Sim //figure8Sim
   var time = System.currentTimeMillis()
   var simTime = 0.0
-  var orbit: List[(Double, Double)] = List()
+  var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
   (new Thread(this)).start()
 
   override def onDraw(canvas: Canvas) {
     val showOrbit = true
     super.onDraw(canvas)
     canvas.drawColor(Color.BLACK)
-    val colors = Array(Color.GREEN, Color.MAGENTA, Color.BLUE, Color.RED, Color.CYAN)
+    val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
+    assert(sim.bodies.length <= colors.length)
 
     val width = canvas.getWidth()
     val height = canvas.getHeight()
 
     if (showOrbit) {
-      for (body <- sim.bodies)
-        orbit = (body.pos.x, body.pos.y) :: orbit
+      for (i <- 0 until sim.bodies.length)
+        orbit = (sim.bodies(i).pos.x, sim.bodies(i).pos.y, colors(i)) :: orbit
 
       for (coord <- orbit) {
-        val (x, y) = coord
-        drawCartesianXY(x, y, width, height, canvas, Color.GRAY, 2)
+        val (x, y, color) = coord
+        drawCartesianXY(x, y, width, height, canvas, color, 2)
       }
     }
 
