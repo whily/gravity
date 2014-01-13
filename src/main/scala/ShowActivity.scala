@@ -82,13 +82,15 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
   val sim = new NBody(config, 0.0001)
   var time = System.currentTimeMillis()
   var simTime = 0.0
-  var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
-  (new Thread(this)).start()
+  val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
+   assert(sim.bodies.length <= colors.length)
   var sf = 0.0
-
+  var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
   val paint = new Paint()
   paint.setAntiAlias(true)
   paint.setStyle(Paint.Style.FILL)
+
+  (new Thread(this)).start()
 
   private def scalingFactor(width: Int, height: Int): Double = {
     var maxX = 0.0
@@ -108,9 +110,7 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
     val showInfo = false
 
     canvas.drawColor(Color.BLACK)
-    val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
-    assert(sim.bodies.length <= colors.length)
-
+ 
     val width = canvas.getWidth()
     val height = canvas.getHeight()
 
