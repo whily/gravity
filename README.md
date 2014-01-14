@@ -28,9 +28,10 @@ The following tools are needed to build Gravity from source:
 * [Inkscape](http://inkscape.org) and [ImageMagick](http://www.imagemagick.org)
   to generate icons.
 
-The only library dependency is
-[scasci](http://github.com/whily/scasci). Please follow the steps
-discussed there on how to use the library.
+The library dependencies include
+[scasci](https://github.com/whily/scasci) and
+[scaland](https://github.com/whily/scaland). Please follow the steps
+discussed in those libraries on how to use them.
 
 To compile/run the code, follow the steps below:
 

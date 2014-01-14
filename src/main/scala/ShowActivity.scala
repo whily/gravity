@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.view.{Menu, MenuItem, MotionEvent, View}
 import android.widget.{ArrayAdapter, LinearLayout}
 import net.whily.scasci.phys._
+import net.whily.scaland.Util
 
 class ShowActivity extends Activity with ActionBar.OnNavigationListener {
   private var bar: ActionBar = null
@@ -35,14 +36,7 @@ class ShowActivity extends Activity with ActionBar.OnNavigationListener {
     bar = getActionBar
     bar.setHomeButtonEnabled(true)
 
-    // Enter immersive mode.
-    getWindow().getDecorView().
-      setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | 
-                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                            View.SYSTEM_UI_FLAG_FULLSCREEN |
-                            View.SYSTEM_UI_FLAG_IMMERSIVE)
+    Util.requestImmersiveMode(this)
 
     // Show navigation list, which is at the left side of action bar.
     val configNames = NBody.threeBodyConfigs map (_.name)
