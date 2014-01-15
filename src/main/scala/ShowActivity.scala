@@ -1,13 +1,13 @@
 /**
- * Search activity for World Metro.
- *
- * @author  Yujian Zhang <yujian{dot}zhang[at]gmail(dot)com>
- *
- * License: 
- *   GNU General Public License v2
- *   http://www.gnu.org/licenses/gpl-2.0.html
- * Copyright (C) 2014 Yujian Zhang
- */
+  * 2D demo activity.
+  *
+  * @author  Yujian Zhang <yujian{dot}zhang[at]gmail(dot)com>
+  *
+  * License: 
+  *   GNU General Public License v2
+  *   http://www.gnu.org/licenses/gpl-2.0.html
+  * Copyright (C) 2014 Yujian Zhang
+  */
 
 package net.whily.android.gravity
 
@@ -16,21 +16,20 @@ import android.app.{ActionBar, Activity}
 import android.content.{Intent, Context}
 import android.graphics.{Canvas, Color, Paint}
 import android.os.Bundle
-import android.view.{Menu, MenuItem, MotionEvent, SurfaceHolder, SurfaceView, View}
+import android.view.{Menu, MenuItem, MotionEvent, View}
 import android.widget.{ArrayAdapter, LinearLayout}
 import net.whily.scasci.phys._
-import net.whily.scaland.Util
+import net.whily.scaland.{Render2DActivity, Render2DView, Util}
 
-class ShowActivity extends Activity with ActionBar.OnNavigationListener {
+class ShowActivity extends Render2DActivity with ActionBar.OnNavigationListener {
   private var bar: ActionBar = null
-  private var view: ShowView = null
   private var configId: Int   = 0
   
   override def onCreate(icicle: Bundle) { 
     super.onCreate(icicle)
 
-    view = new ShowView(this, configId)
-    setContentView(view)  
+    renderView = new ShowView(this, configId)
+    setContentView(renderView)  
     setTitle("")
     
     bar = getActionBar
@@ -44,16 +43,6 @@ class ShowActivity extends Activity with ActionBar.OnNavigationListener {
     configAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST)
     bar.setListNavigationCallbacks(configAdapter, this)
-  }
-
-  override protected def onResume() {
-    super.onResume()
-    view.resume()
-  }
-
-  override protected def onPause() {
-    super.onPause()
-    view.pause()
   }
    
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
@@ -73,21 +62,17 @@ class ShowActivity extends Activity with ActionBar.OnNavigationListener {
   override def onNavigationItemSelected(itemPosition: Int, itemId: Long): Boolean = {
     if (itemPosition != configId) {
       configId = itemPosition
-      view.pause()
-      view = new ShowView(this, configId)
-      setContentView(view)
-      view.resume()
+      renderView.pause()
+      renderView = new ShowView(this, configId)
+      setContentView(renderView)
+      renderView.resume()
     }    
     
     true
   }
 }
 
-class ShowView(context: Context, configId: Int) extends SurfaceView(context) with Runnable {
-  var renderThread: Thread = null
-  var holder: SurfaceHolder = getHolder()
-  @volatile var running: Boolean = false
-
+class ShowView(context: Context, configId: Int) extends Render2DView(context) with Runnable {
   val fpsLimit = 50
   val drawInterval = 1000 / fpsLimit // In ms.
   val config = NBody.threeBodyConfigs(configId)
@@ -102,56 +87,23 @@ class ShowView(context: Context, configId: Int) extends SurfaceView(context) wit
   paint.setAntiAlias(true)
   paint.setStyle(Paint.Style.FILL)
 
-  def resume() {
-    running = true
-    renderThread = new Thread(this)
+  override def resume() {
+    super.resume()
     time = System.currentTimeMillis()
-    renderThread.start()
-  }
-
-  def run() {
-    while (running) {
-      if (holder.getSurface().isValid()) {
-        val canvas = holder.lockCanvas()
-
-        val now = System.currentTimeMillis()
-        val elapsed = now - time
-        if (elapsed < drawInterval)
-          Thread.sleep(drawInterval - elapsed)
-
-        calculate()
-        drawOn(canvas)
-
-        holder.unlockCanvasAndPost(canvas)
-      }
-    }
-  }
-
-  def pause() {
-    running = false
-    while(true) {
-      try {
-        renderThread.join()
-        return
-      } catch {
-        // Retry
-        case ex: InterruptedException => None
-      }
-    }
-  }
-
-  private def scalingFactor(width: Int, height: Int): Double = {
-    var maxX = 0.0
-    var maxY = 0.0
-    for (body <- config.bodies) {
-      if (math.abs(body.pos.x) > maxX) maxX = math.abs(body.pos.x)
-      if (math.abs(body.pos.y) > maxY) maxY = math.abs(body.pos.y)
-    }
-    // 0.8 i used so that the figure is not occupying the whole canvas.
-    0.8 * math.min(width / 2 / maxX, width / 2 / maxY)
   }
 
   def drawOn(canvas: Canvas) {
+    val elapsed = System.currentTimeMillis() - time
+    // Limit FPS.
+    if (elapsed < drawInterval)
+      Thread.sleep(drawInterval - elapsed)
+
+    val now = System.currentTimeMillis()
+    // Slow down simulation by dividing 5.
+    simTime += (now - time) / 1000.0 / 5.0 
+    time = now
+    sim.evolve("rk4", simTime)
+
     val showOrbit = true
     val showInfo = false
 
@@ -178,13 +130,15 @@ class ShowView(context: Context, configId: Int) extends SurfaceView(context) wit
       drawBody(sim.bodies(i), width, height, canvas, colors(i))
   }
 
-  def calculate() {
-    val now = System.currentTimeMillis()
-    val elapsed = (now - time) / 1000.0
-    time = now
-    simTime += elapsed / 10.0 // Slow down simulation
-    sim.evolve("rk4", simTime)
-    // TODO: Try FPS limitation here.
+  private def scalingFactor(width: Int, height: Int): Double = {
+    var maxX = 0.0
+    var maxY = 0.0
+    for (body <- config.bodies) {
+      if (math.abs(body.pos.x) > maxX) maxX = math.abs(body.pos.x)
+      if (math.abs(body.pos.y) > maxY) maxY = math.abs(body.pos.y)
+    }
+    // 0.8 i used so that the figure is not occupying the whole canvas.
+    0.8 * math.min(width / 2 / maxX, width / 2 / maxY)
   }
 
   private def drawBody(body: Body, width: Int, height: Int, canvas: Canvas, color: Int) {
