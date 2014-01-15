@@ -16,7 +16,7 @@ import android.app.{ActionBar, Activity}
 import android.content.{Intent, Context}
 import android.graphics.{Canvas, Color, Paint}
 import android.os.Bundle
-import android.view.{Menu, MenuItem, MotionEvent, View}
+import android.view.{Menu, MenuItem, MotionEvent, SurfaceHolder, SurfaceView, View}
 import android.widget.{ArrayAdapter, LinearLayout}
 import net.whily.scasci.phys._
 import net.whily.scaland.Util
@@ -45,6 +45,16 @@ class ShowActivity extends Activity with ActionBar.OnNavigationListener {
     bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST)
     bar.setListNavigationCallbacks(configAdapter, this)
   }
+
+  override protected def onResume() {
+    super.onResume()
+    view.resume()
+  }
+
+  override protected def onPause() {
+    super.onPause()
+    view.pause()
+  }
    
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
     getMenuInflater().inflate(R.menu.show, menu)
@@ -63,15 +73,23 @@ class ShowActivity extends Activity with ActionBar.OnNavigationListener {
   override def onNavigationItemSelected(itemPosition: Int, itemId: Long): Boolean = {
     if (itemPosition != configId) {
       configId = itemPosition
+      view.pause()
       view = new ShowView(this, configId)
       setContentView(view)
+      view.resume()
     }    
     
     true
   }
 }
 
-class ShowView(context: Context, configId: Int) extends View(context) with Runnable {
+class ShowView(context: Context, configId: Int) extends SurfaceView(context) with Runnable {
+  var renderThread: Thread = null
+  var holder: SurfaceHolder = getHolder()
+  @volatile var running: Boolean = false
+
+  val fpsLimit = 50
+  val drawInterval = 1000 / fpsLimit // In ms.
   val config = NBody.threeBodyConfigs(configId)
   val sim = new NBody(config, 0.0001)
   var time = System.currentTimeMillis()
@@ -84,7 +102,43 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
   paint.setAntiAlias(true)
   paint.setStyle(Paint.Style.FILL)
 
-  (new Thread(this)).start()
+  def resume() {
+    running = true
+    renderThread = new Thread(this)
+    time = System.currentTimeMillis()
+    renderThread.start()
+  }
+
+  def run() {
+    while (running) {
+      if (holder.getSurface().isValid()) {
+        val canvas = holder.lockCanvas()
+
+        val now = System.currentTimeMillis()
+        val elapsed = now - time
+        if (elapsed < drawInterval)
+          Thread.sleep(drawInterval - elapsed)
+
+        calculate()
+        drawOn(canvas)
+
+        holder.unlockCanvasAndPost(canvas)
+      }
+    }
+  }
+
+  def pause() {
+    running = false
+    while(true) {
+      try {
+        renderThread.join()
+        return
+      } catch {
+        // Retry
+        case ex: InterruptedException => None
+      }
+    }
+  }
 
   private def scalingFactor(width: Int, height: Int): Double = {
     var maxX = 0.0
@@ -97,9 +151,7 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
     0.8 * math.min(width / 2 / maxX, width / 2 / maxY)
   }
 
-  override def onDraw(canvas: Canvas) {
-    super.onDraw(canvas)
-
+  def drawOn(canvas: Canvas) {
     val showOrbit = true
     val showInfo = false
 
@@ -110,7 +162,6 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
 
     if (sf == 0.0) 
       sf = scalingFactor(width, height)
-
 
     if (showOrbit) {
       if (simTime < config.period)
@@ -127,20 +178,13 @@ class ShowView(context: Context, configId: Int) extends View(context) with Runna
       drawBody(sim.bodies(i), width, height, canvas, colors(i))
   }
 
-  override def run() {
-    while(!Thread.currentThread().isInterrupted()) {
-      try{
-        val now = System.currentTimeMillis()
-        val elapsed = (now - time) / 1000.0
-        time = now
-        simTime += elapsed / 10.0 // Slow down simulation
-        sim.evolve("rk4", simTime)
-        // TODO: Try FPS limitation here.
-      } catch {
-        case ex: InterruptedException => Thread.currentThread().interrupt()
-      }
-      postInvalidate()
-    }
+  def calculate() {
+    val now = System.currentTimeMillis()
+    val elapsed = (now - time) / 1000.0
+    time = now
+    simTime += elapsed / 10.0 // Slow down simulation
+    sim.evolve("rk4", simTime)
+    // TODO: Try FPS limitation here.
   }
 
   private def drawBody(body: Body, width: Int, height: Int, canvas: Canvas, color: Int) {
