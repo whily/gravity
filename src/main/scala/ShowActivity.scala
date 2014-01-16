@@ -76,7 +76,7 @@ class ShowView(context: Context, configId: Int) extends Render2DView(context) wi
   val fpsLimit = 50
   val drawInterval = 1000 / fpsLimit // In ms.
   val config = NBody.threeBodyConfigs(configId)
-  val sim = new NBody(config, 0.0001)
+  val sim = new NBody(config, 0.001)
   var time = System.currentTimeMillis()
   var simTime = 0.0
   val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
@@ -102,7 +102,7 @@ class ShowView(context: Context, configId: Int) extends Render2DView(context) wi
     // Slow down simulation by dividing 5.
     simTime += (now - time) / 1000.0 / 5.0 
     time = now
-    sim.evolve("rk4", simTime)
+    sim.evolve(simTime)
 
     val showOrbit = true
     val showInfo = false
