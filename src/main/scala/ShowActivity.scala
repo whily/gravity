@@ -147,7 +147,7 @@ class ShowView(context: Context, configId: Int) extends Render2DView(context) wi
 
   private def drawCartesianXY(x: Double, y: Double, width: Int, height: Int, canvas: Canvas, color: Int, radius: Int) {
     val screenX = (x * sf).toInt + width / 2
-    val screenY = (y * sf).toInt + height / 2
+    val screenY = (-y * sf).toInt + height / 2
     paint.setColor(color)
     canvas.drawCircle(screenX, screenY, radius, paint)
   }
