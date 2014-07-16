@@ -23,7 +23,7 @@ import net.whily.scaland.{Render2DActivity, Render2DView, Util}
 
 class ShowActivity extends Render2DActivity with ActionBar.OnNavigationListener {
   private var bar: ActionBar = null
-  private var configId: Int   = 0
+  private var configId: Int = 0
   
   override def onCreate(icicle: Bundle) { 
     super.onCreate(icicle)
@@ -80,7 +80,7 @@ class ShowView(context: Context, configId: Int) extends Render2DView(context) wi
   var time = System.currentTimeMillis()
   var simTime = 0.0
   val colors = Array(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA)
-   assert(sim.bodies.length <= colors.length)
+  assert(sim.bodies.length <= colors.length)
   var sf = 0.0
   var orbit: List[(Double, Double, Int)] = List()   // (x, y, color)
   val paint = new Paint()
