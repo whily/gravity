@@ -13,7 +13,9 @@ object GravityBuild extends android.AutoBuild {
     scalacOptions in Compile ++= Seq("-deprecation", "-Xexperimental"),
 
     javacOptions ++= Seq("-encoding", "UTF-8", "-source", "1.6", "-target", "1.6"),
-    javacOptions in Compile  += "-deprecation",        
+    javacOptions in Compile  += "-deprecation",
+
+    platformTarget in Android := "android-21",    
 
     proguardOptions in Android += "-keep class net.whily.android.gravity.** { *; }",
     proguardOptions in Android += "-keep class scala.collection.SeqLike { public java.lang.String toString(); }",
