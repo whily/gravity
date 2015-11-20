@@ -39,18 +39,8 @@ To compile/run the code, follow the steps below in the project directory:
         $ ./genart
         $ sbt android:run        
         
-Testing
--------
+To build a release version and start it in a connected device:
 
-There are two types of testing can be performed:
+        $ sbt android:set-release android:run
 
-* Unit testing. Simply run the following command in shell:
-    
-        $ sbt test
-        
-* Android integration testing. Run the following commands in sbt:
-
-        > project tests
-        > android:install
-        > android:test
 
