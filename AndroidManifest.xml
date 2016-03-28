@@ -3,8 +3,8 @@
           package="net.whily.android.gravity"
           android:versionCode="1"
           android:versionName="0.0.1" >
-  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
-  
+  <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23" />
+
   <application
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher_gravity"
@@ -19,6 +19,6 @@
       </intent-filter>
     </activity>
     <activity android:name=".SettingsActivity"
-              android:label="@string/settings" />        
+              android:label="@string/settings" />
   </application>
 </manifest>
