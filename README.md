@@ -20,12 +20,12 @@ Development
 
 The following tools are needed to build Gravity from source:
 
-* JDK version 6/7 from <http://www.java.com> if Java is not available. 
+* JDK version 6/7/8 from <http://www.java.com> if Java is not available.
   Note that JDK is preinstalled on Mac OS X and available via package manager
-  on many Linux systems. 
-* Android SDK r23.0.5.
-* Scala (2.11.6)
-* sbt (0.13.8)
+  on many Linux systems.
+* Android SDK r24.4.1.
+* Scala (2.11.8)
+* sbt (0.13.13)
 * [Inkscape](http://inkscape.org) and [ImageMagick](http://www.imagemagick.org)
   to generate icons.
 
@@ -37,10 +37,8 @@ discussed in those libraries on how to use them.
 To compile/run the code, follow the steps below in the project directory:
 
         $ ./genart
-        $ sbt android:run        
-        
+        $ sbt android:run
+
 To build a release version and start it in a connected device:
 
         $ sbt android:set-release android:run
-
-
