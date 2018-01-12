@@ -5,7 +5,7 @@ enablePlugins(AndroidApp)
 
 name := "gravity"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
 libraryDependencies ++= Seq(
   "net.whily" %% "scasci" % "0.0.1-SNAPSHOT",
