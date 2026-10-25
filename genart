@@ -16,7 +16,7 @@ GenerateDark() {
 ConvertSingle() {
   svg=$1  
   dpi=$2
-  png=../res/drawable-${dpi}/${svg%.svg}.png
+  png=../app/src/main/res/drawable-${dpi}/${svg%.svg}.png
   dim=$3
   edim=$4
   # convert -background none $svg -size ${dim}x${dim} $png
@@ -65,7 +65,7 @@ ConvertToActionBarIcon() {
   Convert $dark 24 32 48 64 96 scale
 }
 
-mkdir -p res/drawable-ldpi/ res/drawable-mdpi/ res/drawable-mdpi/ res/drawable-hdpi/ res/drawable-xhdpi/ res/drawable-xxhdpi/
+mkdir -p app/src/main/res/drawable-ldpi/ app/src/main/res/drawable-mdpi/ app/src/main/res/drawable-hdpi/ app/src/main/res/drawable-xhdpi/ app/src/main/res/drawable-xxhdpi/
 
 cd art/
 ConvertToLauncherIcon ic_launcher_gravity.svg

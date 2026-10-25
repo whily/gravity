@@ -1,25 +1,22 @@
-/bin
-/gen
-/res/drawable-*
+# Gradle
+.gradle/
+build/
+.kotlin/
+
+# Local configuration
 local.properties
-proguard.cfg
+
+# IDE
+.idea
+.cache
 *.class
 *.log
-.cache
-libs/
-lib/
-proguard_cache/
 
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-
-# Scala-IDE specific
-.scala_dependencies
-
-# Ensime specific
-.ensime*
+# Generated icons
+app/src/main/res/drawable/
+app/src/main/res/drawable-ldpi/
+app/src/main/res/drawable-mdpi/
+app/src/main/res/drawable-hdpi/
+app/src/main/res/drawable-xhdpi/
+app/src/main/res/drawable-xxhdpi/
+*.png

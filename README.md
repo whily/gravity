@@ -18,27 +18,41 @@ For more information about Gravity, please go to
 Development
 -----------
 
-The following tools are needed to build Gravity from source:
+Gravity is written in Kotlin with
+[Kotlin Multiplatform](https://kotlinlang.org/lp/multiplatform/).  The
+following tools are needed to build Gravity from source:
 
-* JDK version 8 from <http://www.java.com> if Java is not available.
+* JDK version 21 or later from <http://www.java.com> if Java is not available.
   Note that JDK is preinstalled on Mac OS X and available via package manager
   on many Linux systems.
-* Android SDK r25.2.5.
-* Scala (2.11.11)
-* sbt (0.13.16)
+* Android SDK with platform android-34 and build tools 36.0.0.
 * [Inkscape](http://inkscape.org) and [ImageMagick](http://www.imagemagick.org)
   to generate icons.
 
-The library dependencies include
-[scasci](https://github.com/whily/scasci) and
-[scaland](https://github.com/whily/scaland). Please follow the steps
-discussed in those libraries on how to use them.
+Gradle is used to build the code, and the included Gradle wrapper
+downloads the matching Gradle distribution automatically, so a local
+Gradle installation is not needed.
 
-To compile/run the code, follow the steps below in the project directory:
+### Generate the icons
+
+In project directory, run following command:
 
         $ ./genart
-        $ sbt android:run
 
-To build a release version and start it in a connected device:
+### Build the code
 
-        $ sbt android:set-release android:run
+The library dependencies include
+[kotsci](https://github.com/whily/kotsci) and
+[kotland](https://github.com/whily/kotland).  Please follow the steps
+discussed in those libraries on how to build them, and publish them
+to the local Maven repository, e.g. in each library directory:
+
+        $ gradle publishToMavenLocal
+
+To build the app and install it in a connected device:
+
+        $ ./gradlew :app:installDebug
+
+To build a release version:
+
+        $ ./gradlew :app:assembleRelease
